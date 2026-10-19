@@ -1,0 +1,25 @@
+{
+  "name": "sixteen-memory-cloudflare",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "types": "wrangler types",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/*.test.ts",
+    "test:runtime": "tsx scripts/runtime-smoke.ts",
+    "dev": "wrangler dev",
+    "build": "wrangler deploy --dry-run",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "^22",
+    "miniflare": "5.20261012.1-beta",
+    "tsx": "^4",
+    "typescript": "^5.9",
+    "wrangler": "4.151.1"
+  }
+}

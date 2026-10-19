@@ -1,0 +1,4 @@
+# Real values go in .dev.vars (ignored) or Cloudflare Worker secrets.
+MEMORY_API_KEY=replace-with-a-random-secret-at-least-32-characters
+EMBEDDING_API_KEY=
+LLM_API_KEY=

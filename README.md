@@ -3,9 +3,10 @@
 A small, source-linked memory service for the Agent Memory Leaderboard (AML)
 open-source textual track. Team: **sixteen**. Maintainer: **Chengyuan Ma**.
 
-**Status:** initial implementation, not an official AML submission. No live
-provider or public deployment has been verified. There are no official Smoke,
-Full, ranking or performance claims.
+**Status:** source implementation, not an official AML submission. The Python
+v0.1.0 baseline is preserved; a separate Cloudflare v0.2.0 adapter is available.
+No live model provider, official Smoke, Full, ranking or performance is claimed.
+See [cloudflare/README.md](cloudflare/README.md) for the serverless deployment.
 
 ## Method
 
@@ -100,6 +101,10 @@ The response has `data: [{id, content, score, created_at?}]`. No match produces
 they are used only as retrieval terms, not selected or answered.
 
 ## Deployment
+
+For Cloudflare, use [cloudflare/README.md](cloudflare/README.md). Its runtime uses
+per-user SQLite Durable Objects and SQLite FTS5 BM25, not a persistent local disk.
+The initial Cloudflare configuration uses lexical retrieval with no model calls.
 
 See [deployment.md](docs/deployment.md) for the required public HTTPS host,
 model credentials, request limits, version freeze and retention requirements.
