@@ -9,7 +9,7 @@ const response = await get("/health");
 assert.equal(response.status, 200);
 const health = await response.json();
 assert.equal(health.status, "ok");
-assert.equal(health.version, "0.2.0");
+assert.match(health.version, /^0\.2\.\d+$/);
 assert.equal(health.mode, "lexical");
 assert.equal(health.facts, false);
 assert.equal(health.authenticated_endpoints_configured, true);

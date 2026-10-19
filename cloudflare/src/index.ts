@@ -192,7 +192,10 @@ export class UserMemory extends DurableObject<RuntimeEnv> {
           "SELECT * FROM chunks WHERE id=? AND expires>?", id, Date.now(),
         ).toArray()[0];
         if (!row) continue;
-        const identity = JSON.stringify([row.session_id, row.role, row.timestamp, row.source]);
+        // Identical text at different source positions is still distinct evidence.
+        const identity = JSON.stringify([
+          row.request_id, row.session_id, row.position, row.offset, row.role, row.timestamp, row.source,
+        ]);
         if (seen.has(identity)) continue;
         seen.add(identity);
         data.push(evidence(id, row, score));

@@ -1,6 +1,6 @@
 {
   "name": "sixteen-memory-cloudflare",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test test/*.test.ts",
     "test:runtime": "tsx scripts/runtime-smoke.ts",
+    "test:extended": "node scripts/extended-runtime.mjs",
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy"

@@ -1,6 +1,6 @@
 # Sixteen Memory on Cloudflare
 
-Version **0.2.0**. A Worker exposes the AML textual Add/Search contract. Each
+Version **0.2.1**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
@@ -27,6 +27,7 @@ npm run typecheck
 npm test
 npx wrangler deploy --dry-run --outdir dist
 npm run test:runtime
+npm run test:extended
 npm audit --registry=https://registry.npmjs.org --audit-level=high
 ```
 
@@ -34,6 +35,25 @@ The test runtime version matches the Miniflare release used by pinned Wrangler.
 All tests use synthetic data and fake or disabled model providers.
 Runtime tests verify actual Workers SQLite, FTS5, retries, isolation, persistence
 across restarts, expired-record exclusion, capacity errors and body limits.
+The extended suite exercises 1,000 synthetic records and at most four concurrent
+requests. The long-source regression preserves identical text at different
+message positions and character offsets; v0.2.1 fixes over-aggressive deduplication.
+
+### Authenticated public tests
+
+The manual `Authenticated Synthetic API Test` workflow runs the same bounded
+suite against the actual service. It is restricted to the repository owner's
+manual invocation on `main`. It never runs on a pull request and has no model keys.
+An operator must first configure a temporary service credential and send that
+credential to the repository's `SIXTEEN_TEMP_TEST_KEY` Actions secret.
+After the run, restore the original service credential, run the `revoked` phase
+to verify rejection of the temporary key, and delete the temporary Actions secret.
+Do not copy the original service key to CI or pass any credential as an input/URL.
+Synthetic test namespaces use the configured TTL; test output contains only
+synthetic identifiers, counts, statuses and timings.
+
+Passing a small synthetic run is not proof of unlimited capacity, benchmark
+retrieval quality, provider retention compliance or official AML Smoke success.
 
 ## Deploy
 

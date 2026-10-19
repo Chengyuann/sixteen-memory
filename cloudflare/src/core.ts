@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VERSION = "0.2.0";
+export const VERSION = "0.2.1";
 export const MAX_BODY = 2 * 1024 * 1024;
 
 const identifier = z.string().min(1).max(512);

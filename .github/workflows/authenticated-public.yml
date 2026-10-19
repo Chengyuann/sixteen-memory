@@ -1,0 +1,31 @@
+name: Authenticated Synthetic API Test
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: Run synthetic tests or verify the temporary key was revoked
+        type: choice
+        default: test
+        options: [test, revoked]
+permissions:
+  contents: read
+concurrency:
+  group: sixteen-authenticated-test
+  cancel-in-progress: false
+jobs:
+  test:
+    if: github.repository == 'Chengyuann/sixteen-memory' && github.actor == 'Chengyuann' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Bounded synthetic public Add/Search tests
+        env:
+          SIXTEEN_TEMP_TEST_KEY: ${{ secrets.SIXTEEN_TEMP_TEST_KEY }}
+          TEST_PHASE: ${{ inputs.phase }}
+        run: node cloudflare/scripts/authenticated-public.mjs
