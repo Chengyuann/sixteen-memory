@@ -28,6 +28,7 @@ npm test
 npx wrangler deploy --dry-run --outdir dist
 npm run test:runtime
 npm run test:extended
+npm run test:deep
 npm audit --registry=https://registry.npmjs.org --audit-level=high
 ```
 
@@ -38,6 +39,9 @@ across restarts, expired-record exclusion, capacity errors and body limits.
 The extended suite exercises 1,000 synthetic records and at most four concurrent
 requests. The long-source regression preserves identical text at different
 message positions and character offsets; v0.2.1 fixes over-aggressive deduplication.
+The deep local suite exercises the declared 10,000-live-chunk boundary and
+overflow rollback, and invokes an actual local Durable Object alarm to verify
+physical deletion of source rows, retry rows and FTS rows.
 
 ### Authenticated public tests
 

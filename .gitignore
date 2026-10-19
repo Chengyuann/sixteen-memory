@@ -23,3 +23,4 @@ node_modules/
 .dev.vars.*
 !.dev.vars.example
 cloudflare/worker-configuration.d.ts
+cloudflare/dist-test/

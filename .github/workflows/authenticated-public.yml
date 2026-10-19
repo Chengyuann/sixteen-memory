@@ -6,7 +6,11 @@ on:
         description: Run synthetic tests or verify the temporary key was revoked
         type: choice
         default: test
-        options: [test, revoked]
+        options: [test, persistence, revoked]
+      namespace_prefix:
+        description: Synthetic namespace prefix for read-only persistence checks
+        required: false
+        type: string
 permissions:
   contents: read
 concurrency:
@@ -28,4 +32,5 @@ jobs:
         env:
           SIXTEEN_TEMP_TEST_KEY: ${{ secrets.SIXTEEN_TEMP_TEST_KEY }}
           TEST_PHASE: ${{ inputs.phase }}
+          TEST_NAMESPACE_PREFIX: ${{ inputs.namespace_prefix }}
         run: node cloudflare/scripts/authenticated-public.mjs

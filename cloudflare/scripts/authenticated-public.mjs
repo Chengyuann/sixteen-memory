@@ -5,17 +5,39 @@ import { runAuthenticatedSuite } from "./authenticated-suite.mjs";
 const baseUrl = "https://sixteen-memory.mcy23.workers.dev";
 const key = process.env.SIXTEEN_TEMP_TEST_KEY;
 if (!key || !/^[A-Za-z0-9_-]{43}$/.test(key)) throw new Error("Temporary test key not configured");
+const post = async (path, body) => {
+  const response = await fetch(baseUrl + path, {
+    method: "POST", redirect: "error", signal: AbortSignal.timeout(20_000),
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json();
+  return { response, data };
+};
 if (process.env.TEST_PHASE === "revoked") {
   for (const path of ["/v1/memories/add", "/v1/memories/search"]) {
-    const response = await fetch(baseUrl + path, {
-      method: "POST", redirect: "error", signal: AbortSignal.timeout(20_000),
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: "{}",
-    });
+    const { response } = await post(path, {});
     assert.equal(response.status, 401);
-    await response.body?.cancel();
   }
   console.log("PASS: temporary test credential revoked on both protected endpoints.");
+  process.exit(0);
+}
+if (process.env.TEST_PHASE === "persistence") {
+  const prefix = process.env.TEST_NAMESPACE_PREFIX ?? "";
+  assert.match(prefix, /^synthetic-[0-9a-f-]{36}$/);
+  for (const [scope, query, suffix] of [
+    ["a", "marigold", "Alice lives in Paris. Her unique marker is marigold."],
+    ["unicode", "杭州 桂花茶", "小林住在杭州，喜欢桂花茶。纪念标记：🌸。"],
+    ["load", "record999", "Catalog item record999 has shelf shelf13. Synthetic inventory evidence 999."],
+  ]) {
+    const { response, data } = await post("/v1/memories/search", {
+      user_id: `${prefix}:${scope}`, query, top_k: 5,
+    });
+    assert.equal(response.status, 200);
+    assert.equal(data.data.length, 1);
+    assert.ok(data.data[0].content.endsWith(suffix));
+  }
+  console.log("PASS: prior synthetic data survived Worker/key version changes and remained isolated/searchable.");
   process.exit(0);
 }
 if (process.env.TEST_PHASE && process.env.TEST_PHASE !== "test") throw new Error("Invalid test phase");
