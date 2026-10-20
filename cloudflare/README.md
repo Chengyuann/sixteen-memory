@@ -1,6 +1,6 @@
 # Sixteen Memory on Cloudflare
 
-Version **0.2.1**. A Worker exposes the AML textual Add/Search contract. Each
+Version **0.2.2**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
@@ -40,6 +40,8 @@ across restarts, expired-record exclusion, capacity errors and body limits.
 The extended suite exercises 1,000 synthetic records and at most four concurrent
 requests. The long-source regression preserves identical text at different
 message positions and character offsets; v0.2.1 fixes over-aggressive deduplication.
+Version 0.2.2 accepts the case-insensitive HTTP Bearer authentication scheme
+while preserving exact constant-time comparison of the credential.
 The deep local suite exercises the declared 10,000-live-chunk boundary and
 overflow rollback, and invokes an actual local Durable Object alarm to verify
 physical deletion of source rows, retry rows and FTS rows.
@@ -85,7 +87,9 @@ Public health: `GET /health`. Protected routes:
 - `POST /v1/memories/add`
 - `POST /v1/memories/search`
 
-Both require `Authorization: Bearer <MEMORY_API_KEY>`.
+Both require `Authorization: Bearer <MEMORY_API_KEY>`. The `Bearer` scheme name
+is matched case-insensitively as required by HTTP; the key remains an exact,
+constant-time byte comparison. Other schemes are rejected.
 Health returns 503 until the required configuration and API credential exist.
 
 The initial deployment fails closed before the key is set. `workers.dev` is

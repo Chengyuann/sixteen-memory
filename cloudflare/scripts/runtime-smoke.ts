@@ -30,12 +30,14 @@ const body = {
 };
 const query = { query: "Alice", user_id: "scope-1", top_k: 100 };
 
-async function post(mf: Miniflare, path: string, data: unknown, authorized = true) {
+async function post(mf: Miniflare, path: string, data: unknown, authorization: boolean | string = true) {
   const response = await mf.dispatchFetch(origin + "/v1/memories/" + path, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(authorized ? { Authorization: "Bearer " + key } : {}),
+      ...(authorization === false ? {} : {
+        Authorization: authorization === true ? "Bearer " + key : authorization,
+      }),
     },
     body: JSON.stringify(data),
   });
@@ -58,6 +60,26 @@ try {
   assert.equal(result.body.data.length, 1);
   assert.ok(result.body.data[0].content.endsWith("Alice lives in Paris."));
   assert.equal(result.body.data[0].created_at, "2024-01-01T00:00:00.000Z"); checks++;
+  for (const authorization of [
+    "bearer " + key, "BEARER " + key, "bEaReR " + key, "Bearer   " + key,
+  ]) {
+    const added = await post(mf, "add", body, authorization);
+    assert.equal(added.status, 200, "Add must accept the case-insensitive Bearer scheme");
+    assert.equal(added.body.request_id, body.request_id);
+    assert.deepEqual(await post(mf, "search", query, authorization), result);
+    checks++;
+  }
+  for (const authorization of [
+    "", "Bearer", "Bearer ", "Token " + key, "Basic " + key, "Bearer\t" + key,
+    "Bearer wrong", "Bearer " + key.toUpperCase(), `Bearer ${key}, Bearer ${key}`,
+  ]) {
+    for (const [path, data] of [["add", body], ["search", query]] as const) {
+      assert.deepEqual(await post(mf, path, data, authorization), {
+        status: 401, body: { detail: "Invalid credentials" },
+      });
+    }
+    checks++;
+  }
   assert.equal((await post(mf, "add", body)).status, 200);
   assert.deepEqual((await post(mf, "search", query)).body, result.body); checks++;
   assert.equal((await post(mf, "add", {

@@ -19,6 +19,17 @@ function failed(error: unknown): Result {
     : { status: 503, body: { detail: "Memory storage unavailable" } };
 }
 
+function validBearer(value: string, key: string): boolean {
+  const separator = value.indexOf(" ");
+  if (separator <= 0 || value.slice(0, separator).toLowerCase() !== "bearer") return false;
+  let credentialStart = separator;
+  while (value.charCodeAt(credentialStart) === 0x20) credentialStart++;
+  if (credentialStart === value.length) return false;
+  const actual = new TextEncoder().encode(value.slice(credentialStart));
+  const expected = new TextEncoder().encode(key);
+  return actual.byteLength === expected.byteLength && crypto.subtle.timingSafeEqual(actual, expected);
+}
+
 export class UserMemory extends DurableObject<RuntimeEnv> {
   private busy = false;
   private sql: SqlStorage;
@@ -228,11 +239,7 @@ export default {
       if (request.method !== "POST") return respond({ status: 405, body: { detail: "POST required" } });
       if (!env.MEMORY_API_KEY || env.MEMORY_API_KEY.length < 32) throw new ServiceError(503, "API credentials not configured");
       const supplied = request.headers.get("Authorization") ?? "";
-      const actual = new TextEncoder().encode(supplied);
-      const expected = new TextEncoder().encode("Bearer " + env.MEMORY_API_KEY);
-      if (actual.byteLength !== expected.byteLength || !crypto.subtle.timingSafeEqual(actual, expected)) {
-        throw new ServiceError(401, "Invalid credentials");
-      }
+      if (!validBearer(supplied, env.MEMORY_API_KEY)) throw new ServiceError(401, "Invalid credentials");
       const config = settings(env);
       const raw = await readJson(request);
       if (path === "/v1/memories/add") {
