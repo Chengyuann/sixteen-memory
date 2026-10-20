@@ -34,5 +34,6 @@ jobs:
       - run: npx wrangler deploy --dry-run --outdir dist
       - run: npm run test:runtime
       - run: npm run test:extended
+      - run: npm run test:pages-entry
       - run: npm run test:deep
       - run: npm audit --registry=https://registry.npmjs.org --audit-level=high

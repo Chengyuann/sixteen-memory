@@ -28,6 +28,7 @@ npm test
 npx wrangler deploy --dry-run --outdir dist
 npm run test:runtime
 npm run test:extended
+npm run test:pages-entry
 npm run test:deep
 npm audit --registry=https://registry.npmjs.org --audit-level=high
 ```
@@ -42,6 +43,10 @@ message positions and character offsets; v0.2.1 fixes over-aggressive deduplicat
 The deep local suite exercises the declared 10,000-live-chunk boundary and
 overflow rollback, and invokes an actual local Durable Object alarm to verify
 physical deletion of source rows, retry rows and FTS rows.
+The Pages-entry suite runs the same bounded authenticated checks through a
+transparent Service binding entry. It verifies that this alternate hostname
+preserves the existing Worker's authentication, persistence and response
+semantics without copying its Durable Object storage or embedding a service key.
 
 ### Authenticated public tests
 
@@ -86,6 +91,15 @@ Health returns 503 until the required configuration and API credential exist.
 The initial deployment fails closed before the key is set. `workers.dev` is
 enabled and preview URLs are disabled. No domain registration, paid subscription,
 existing Worker changes, model invocation or formal evaluation is automated.
+
+### Alternate public entry
+
+`pages-entry/` contains a minimal Cloudflare Pages advanced-mode entry used when
+a client network cannot reach `workers.dev`. It forwards the original request to
+the existing `sixteen-memory` Worker through a Cloudflare Service binding.
+It does not use public `fetch`, inject credentials, store data, log bodies or
+change the memory implementation. Deploy it as a separate Pages project and
+verify the actual returned hostname before updating any approved AML binding.
 
 ## Consistency and limits
 
