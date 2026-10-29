@@ -46,9 +46,12 @@ while preserving exact constant-time comparison of the credential.
 Version 0.2.3 accepts long textual questions and options up to the existing
 bounded request-body and field limits instead of rejecting queries with more
 than 512 distinct lexical terms.
-Its configuration targets the separate `sixteen-memory-v023` Worker and
-`sixteen-memory-v023-entry` Pages project, with a new Durable Object namespace.
-The previously approved v0.2.1 deployment and its storage are not updated.
+Its configuration targets the separate `sixteen-memory-v023` Worker with a
+new Durable Object namespace. The existing `sixteen-memory-entry.pages.dev`
+address forwards to this Worker after the new AML version is registered using
+the same Add/Search URLs. A new version does not require a new public address.
+The old v0.2.1 Worker and its storage remain unchanged, but the shared public
+address now serves v0.2.3: never resume or start a v0.2.1 evaluation through it.
 The deep local suite exercises the declared 10,000-live-chunk boundary and
 overflow rollback, and invokes an actual local Durable Object alarm to verify
 physical deletion of source rows, retry rows and FTS rows.
@@ -109,8 +112,11 @@ existing Worker changes, model invocation or formal evaluation is automated.
 a client network cannot reach `workers.dev`. It forwards the original request to
 the `sixteen-memory-v023` Worker through a Cloudflare Service binding.
 It does not use public `fetch`, inject credentials, store data, log bodies or
-change the memory implementation. Deploy it as a separate Pages project and
-verify the actual returned hostname before updating any approved AML binding.
+change the memory implementation. Keep the existing Pages project and public
+hostname. Before changing its backend, confirm that no evaluation is running,
+register the new AML version with the same URLs, retain the old backend, and
+test the new backend. Verify the public Health version and authenticated
+Add/Search after deployment, then start a new Smoke under the new version ID.
 
 ## Consistency and limits
 

@@ -2,7 +2,7 @@ import { appendFile, writeFile } from "node:fs/promises";
 import assert from "node:assert/strict";
 import { runAuthenticatedSuite } from "./authenticated-suite.mjs";
 
-const baseUrl = "https://sixteen-memory-v023-entry.pages.dev";
+const baseUrl = "https://sixteen-memory-entry.pages.dev";
 const key = process.env.SIXTEEN_TEMP_TEST_KEY;
 if (!key || !/^[A-Za-z0-9_-]{43}$/.test(key)) throw new Error("Temporary test key not configured");
 const post = async (path, body) => {
