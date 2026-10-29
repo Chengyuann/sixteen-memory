@@ -1,0 +1,59 @@
+{
+  "status": "complete_no_release_candidate",
+  "official_evaluations": 0,
+  "model_calls": 0,
+  "production_changes": 0,
+  "baseline": "v0.2.5 AML Smoke 0.703559 retained in production",
+  "score_kind": "local evidence recall proxy, not AML or QA accuracy",
+  "final_output_directory": "../../outputs/harness100-final-20261029",
+  "code_sha256": "a0c6242e567b9d592f25dcd6fba9e2ddaff172ccad690617f5697f9949c21219",
+  "public_data_sha256": "92668fd519d59b87b30a913d11bccffbe936529d2463d46e65415e84c4928aca",
+  "experiments": 100,
+  "splits": {
+    "development": 75,
+    "validation_seen": 75,
+    "regression_used": 855,
+    "diagnostic_synthetic": 120
+  },
+  "first_pass_invalid": true,
+  "validation_is_not_fresh_blind_after_first_pass": true,
+  "tests": {
+    "harness": 784,
+    "repo_pytest": 23,
+    "repo_ruff": "passed",
+    "harness_critical_ruff": "passed"
+  },
+  "selected_original": [
+    "D01.05",
+    "D02.01",
+    "D03.07",
+    "D04.06",
+    "D05.08",
+    "D06.03",
+    "D07.02",
+    "D08.03",
+    "D09.01",
+    "D10.01"
+  ],
+  "release_recommendation": "do_not_deploy; keep v0.2.5",
+  "manual_audit": {
+    "D01.05": "small positive proxy but driven by noisy first-person I alias; no release",
+    "D05.08": "larger proxy gain but source coverage loss and one regression; no release"
+  },
+  "experiment_retrievals": 112500,
+  "including_baseline_retrievals": 113625,
+  "outcomes": {
+    "positive_proxy": 2,
+    "negative_validation": 42,
+    "neutral_activated": 49,
+    "inactive_across_evaluated_sets": 7,
+    "approved_release_candidates": 0
+  },
+  "files": {
+    "all-100-results.json": "9e7fc85ac42a47996d99af9d48344a2d36592f1692e3e9967b2837512a3a2721",
+    "all-100-results.csv": "82f34d7ce7a1cb3958c458eeff2d6aa402550f7e191c2955aa7008610255456e",
+    "selection-before-validation.json": "b4c2e9a3d0cb65b848ace2c7793340f3ff3ab5930c99733bb7609dbfa0e808ec",
+    "resume-proof.json": "89caec876a2e53c891261f54f47300b423440ae96747b8b728acb0820efaf552",
+    "baseline-parity.json": "fcc88de5328a901280aba3ca7fe64d74b2ddd090e6f3d757469d1969c5afdcdb"
+  }
+}

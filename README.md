@@ -11,6 +11,16 @@ No Full score or public ranking is claimed. Production uses lexical retrieval,
 not a live model provider.
 See [cloudflare/README.md](cloudflare/README.md) for the serverless deployment.
 
+## Offline research Harness
+
+[harness/README.md](harness/README.md) documents 100 single-mechanism experiments,
+source-only workers, independent indices, fixed selection, resumable runs and
+integrity-checked result tables. Local evidence scores are not AML or answer
+accuracy. This study does not change the deployed v0.2.5 service.
+The October 29 results are in
+[harness/study-20261029.md](harness/study-20261029.md), with the complete
+[100-row CSV](harness/study-20261029.csv).
+
 ## Method
 
 - Preserve source chunks, roles, conversation identifiers and source timestamps.
