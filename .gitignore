@@ -25,3 +25,5 @@ node_modules/
 cloudflare/worker-configuration.d.ts
 cloudflare/dist-test/
 cloudflare/dist-ablation/
+cloudflare/dist-chunk-study/
+cloudflare/dist-rule-study/

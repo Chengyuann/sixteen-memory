@@ -63,6 +63,43 @@ try {
   assert.deepEqual(sources(await search("facts", "meetup")), ["The meetup starts at noon."]);
   checks.push("ordinary matching does not attach arbitrary adjacent text");
 
+  for (const layout of ["separate-session", "distant-same-session"]) {
+    const user = `windows-${layout}`;
+    const ruleA = "Freight tariff protocol calculation requires coefficient A.";
+    const ruleB = "Freight tariff protocol requires adjustment B.";
+    const ruleC = "Freight tariff protocol requires adjustment C.";
+    const definitionB = "B equals five; apply it after the initial step.";
+    const definitionC = "C equals seven; apply it after the second step.";
+    await add(user, "a", "first", Array.from({ length: 8 }, () => ruleA));
+    await add(user, "padding", "first", Array.from({ length: 40 }, (_, i) => `Neutral entry x${i}.`));
+    const sessionB = layout === "separate-session" ? "second" : "first";
+    await add(user, "b", sessionB, [ruleB, definitionB]);
+    await add(user, "padding-b", sessionB, Array.from({ length: 40 }, (_, i) => `Other neutral entry y${i}.`));
+    await add(user, "c", layout === "separate-session" ? "third" : "first", [ruleC, definitionC]);
+    await add(user, "noise", "other", Array.from({ length: 125 }, (_, i) => `Freight appears in catalog ${i}.`));
+    const found = sources(await search(user, "Freight tariff protocol calculation"));
+    for (const original of [ruleA, ruleB, ruleC, definitionB, definitionC]) assert.ok(found.includes(original));
+    checks.push(`duplicate anchors do not hide two further definitions: ${layout}`);
+  }
+
+  await add("weak-anchor", "rule", "rule", [
+    "Freight tariff protocol calculation uses coefficient A.", "A equals three.",
+  ]);
+  await add("weak-anchor", "other", "other", [
+    "Freight appears in a catalog.", "Private unrelated medical detail.",
+  ]);
+  const weak = sources(await search("weak-anchor", "Freight tariff protocol calculation"));
+  assert.ok(weak.includes("A equals three."));
+  assert.ok(!weak.includes("Private unrelated medical detail."));
+  checks.push("a weak theme match does not expand an unrelated sensitive window");
+  const weakStorage = await mf.unsafeGetDurableObjectStorage("context-test", "UserMemory", {
+    name: JSON.stringify([config.vars.SUBMISSION_ID, "weak-anchor"]),
+  });
+  await weakStorage.exec("UPDATE chunks SET expires=0 WHERE request_id='rule'");
+  const expiredRule = sources(await search("weak-anchor", "Freight tariff protocol calculation"));
+  assert.deepEqual(expiredRule, ["Freight appears in a catalog."]);
+  checks.push("an expired rule cannot seed a context window");
+
   const storage = await mf.unsafeGetDurableObjectStorage("context-test", "UserMemory", {
     name: JSON.stringify([config.vars.SUBMISSION_ID, "answer"]),
   });

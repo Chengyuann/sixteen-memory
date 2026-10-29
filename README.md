@@ -3,9 +3,10 @@
 A small, source-linked memory service for the Agent Memory Leaderboard (AML)
 open-source textual track. Team: **sixteen**. Maintainer: **Chengyuan Ma**.
 
-**Status:** source implementation, not an official AML submission. The Python
-v0.1.0 baseline is preserved; a separate Cloudflare v0.2.0 adapter is available.
-No live model provider, official Smoke, Full, ranking or performance is claimed.
+**Status:** the Python v0.1.0 baseline is preserved. The separate Cloudflare
+adapter completed Textual Smoke at v0.2.5 with score 0.703559; v0.2.6 is the
+next candidate. No Full score or public ranking is claimed. Production uses
+lexical retrieval, not a live model provider.
 See [cloudflare/README.md](cloudflare/README.md) for the serverless deployment.
 
 ## Method
@@ -20,8 +21,9 @@ See [cloudflare/README.md](cloudflare/README.md) for the serverless deployment.
 Old and new statements are retained independently; timestamps are evidence, not
 an automatic "newest always wins" rule. Fact extraction never removes original
 text. Exact quotes are checked, but this does not prove every extracted fact is
-semantically correct. The current implementation does not perform temporal query
-reasoning, graph traversal or neighbor expansion.
+semantically correct. The Python implementation does not perform temporal query
+reasoning, graph traversal or neighbor expansion. The Cloudflare adapter's
+separate retrieval heuristics are documented in its README.
 
 This is a baseline to evaluate, not a claim of a novel or superior algorithm.
 The implementation was developed with AI coding assistance and requires human

@@ -1,6 +1,6 @@
 # Sixteen Memory on Cloudflare
 
-Version **0.2.5**. A Worker exposes the AML textual Add/Search contract. Each
+Version **0.2.6**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
@@ -10,8 +10,8 @@ a serverless adapter, not a change to the original Python v0.1.0 baseline.
 - SQLite FTS5's BM25 ranks tokenized source chunks. CJK characters are separated.
 - Original source, source timestamps, message order and provenance are retained.
 - No LLM or embedding API is called in lexical mode.
-- v0.2.3 and v0.2.4 completed Textual Smoke (46/46), scoring 0.6860 and
-  0.6984 respectively. These are not Full scores; v0.2.5 needs a new Smoke.
+- v0.2.3, v0.2.4 and v0.2.5 completed Textual Smoke (46/46), scoring 0.6860,
+  0.6984 and 0.7036 respectively. These are not Full scores; v0.2.6 needs a new Smoke.
 - Hybrid mode adds text-embedding-v4 and RRF. Optional source-linked fact
   extraction uses gpt-4o-mini. Both need approved credentials and live testing
   before being described as enabled or suitable for formal evaluation.
@@ -59,7 +59,14 @@ query, a low-weight preceding-question index for anaphoric answers, and
 same-session rule windows that can cross Add request boundaries. These are
 retrieval heuristics, not semantic state extraction, privacy filtering or
 generated answers. Schema fingerprint 3 requires a fresh storage namespace.
-Its configuration targets the separate `sixteen-memory-v025` Worker with a
+Version 0.2.6 keeps the representation unchanged (schema 3, 1200 code points).
+Rule queries consider up to 32 ranked candidates, but only original sources
+with a rule/procedure/calculation cue can seed a context window. Candidates
+already covered by an earlier window do not consume another anchor. At most
+four 24-row windows are expanded. This prevents repetitive matches from hiding
+other definitions and avoids expanding weak topic-only matches. It is not a
+general sensitivity classifier and does not eliminate all adjacent-text risks.
+Its configuration targets the separate `sixteen-memory-v026` Worker with a
 new Durable Object namespace. The existing `sixteen-memory-entry.pages.dev`
 address forwards to this Worker after the new AML version is registered using
 the same Add/Search URLs. A new version does not require a new public address.
@@ -118,6 +125,30 @@ STUDY_SPLIT=synthetic STUDY_VARIANTS=000,100,020,001,120,101,021,121 \
   node scripts/ablation-runtime.mjs
 ```
 
+### v0.2.6 experiments
+
+`scripts/chunk-study.mjs` compares isolated source builds pinned to v0.2.5.
+Four chunk configurations were compared on 36 new development questions.
+The selected 800-character boundary-aware candidate reduced returned text
+on a 36-question validation set by 23.6%, but turn recall@100 fell from
+0.9329 to 0.9190. It was rejected; production chunking stays unchanged.
+
+`scripts/rule-context-study.mjs` tests duplicate anchors across separate
+sessions and distant positions in one session, plus ordinary-query and weak
+topic-match privacy counterexamples. The final candidate passed 49/49 versus
+13/49 for the pinned baseline. The earlier ungated window candidate still
+failed 12 sensitive-adjacent cases and was tightened before release.
+The 72-question public retrieval regression was unchanged for both the ungated
+and final candidates; one additional unused rule-intent question was unchanged
+for the final candidate. Public coverage of this path is limited. CL-bench
+was inspected but not scored because its mixed context/task format needs
+an independently validated adapter. No rubrics or answers entered Add/Search.
+
+No approved answer-model credential was available, so the proposed paired
+answerer experiment was not run. Retrieval proxies and synthetic cases do
+not demonstrate end-to-end answer accuracy or predict a 0.75 AML score.
+Prepared public data and local reports are not included in this repository.
+
 ### Authenticated public tests
 
 The manual `Authenticated Synthetic API Test` workflow runs the same bounded
@@ -168,7 +199,7 @@ existing Worker changes, model invocation or formal evaluation is automated.
 
 `pages-entry/` contains a minimal Cloudflare Pages advanced-mode entry used when
 a client network cannot reach `workers.dev`. It forwards the original request to
-the `sixteen-memory-v025` Worker through a Cloudflare Service binding.
+the `sixteen-memory-v026` Worker through a Cloudflare Service binding.
 It does not use public `fetch`, inject credentials, store data, log bodies or
 change the memory implementation. Keep the existing Pages project and public
 hostname. Before changing its backend, confirm that no evaluation is running,
@@ -200,7 +231,8 @@ Add/Search after deployment, then start a new Smoke under the new version ID.
   preceding question within its Add request, with BM25 column weight 0.25.
   Context is not copied into returned evidence. The English cue recognizer is
   heuristic and may miss associations or infer a wrong one.
-- Rule/procedure queries may expand the top four anchors to up to 24 chunks
+- Rule/procedure queries may expand up to four uncovered rule-source anchors
+  among the first 32 ranked candidates to up to 24 chunks
   from each anchor's own session, ordered by stored row proximity. This crosses
   Add boundaries but never user boundaries. Concurrent/out-of-order ingestion
   may differ from source order. This heuristic does not classify or redact

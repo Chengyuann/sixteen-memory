@@ -223,22 +223,27 @@ export class UserMemory extends DurableObject<RuntimeEnv> {
         }
       }
       if (intent.context) {
-        // Neighbouring source passages can define a matched rule or its variables.
-        const anchors = [...ranked].sort((a, b) => b[1] - a[1]).slice(0, 4);
+        // Covered neighbours must not exhaust the four context windows.
+        const anchors = [...ranked].sort((a, b) => b[1] - a[1]).slice(0, 32);
+        const covered = new Set<string>();
+        let windows = 0;
         for (const [id, score] of anchors) {
-          const anchor = this.sql.exec<{ session_id: string; rowid: number }>(
-            "SELECT session_id,rowid FROM chunks WHERE id=? AND expires>?", id, Date.now(),
+          if (covered.has(id)) continue;
+          const anchor = this.sql.exec<{ session_id: string; rowid: number; source: string }>(
+            "SELECT session_id,rowid,source FROM chunks WHERE id=? AND expires>?", id, Date.now(),
           ).toArray()[0];
-          if (!anchor) continue;
+          if (!anchor || !retrievalIntent(anchor.source).context) continue;
           const related = this.sql.exec<{ id: string }>(
             `SELECT id FROM chunks WHERE session_id=? AND expires>?
              ORDER BY abs(rowid-?),rowid LIMIT 24`,
             anchor.session_id, Date.now(), anchor.rowid,
           ).toArray();
           related.forEach((row, index) => {
+            covered.add(row.id);
             const contextualScore = score * 0.95 / (1 + index * 0.05);
             ranked.set(row.id, Math.max(ranked.get(row.id) ?? 0, contextualScore));
           });
+          if (++windows === 4) break;
         }
       }
       const data = [];
