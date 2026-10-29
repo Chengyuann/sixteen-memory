@@ -4,6 +4,13 @@ Version **0.2.6**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
+**Deployment status:** v0.2.6 is a rejected experiment retained in source.
+Its one Textual Smoke succeeded operationally (46/46) but scored 0.601128,
+below v0.2.5's 0.703559. The existing Pages entry targets the retained
+`sixteen-memory-v025` backend again. `wrangler.jsonc` still describes the
+isolated v0.2.6 experiment, not the currently routed production backend.
+Do not submit or resume v0.2.6 evaluations through the shared URL.
+
 ## Initial deployment mode
 
 - `MEMORY_MODE=lexical`, `ENABLE_FACTS=false`.
@@ -11,7 +18,8 @@ a serverless adapter, not a change to the original Python v0.1.0 baseline.
 - Original source, source timestamps, message order and provenance are retained.
 - No LLM or embedding API is called in lexical mode.
 - v0.2.3, v0.2.4 and v0.2.5 completed Textual Smoke (46/46), scoring 0.6860,
-  0.6984 and 0.7036 respectively. These are not Full scores; v0.2.6 needs a new Smoke.
+  0.6984 and 0.7036 respectively. v0.2.6 scored 0.6011 in its one successful
+  Smoke and was rejected. None is a Full score.
 - Hybrid mode adds text-embedding-v4 and RRF. Optional source-linked fact
   extraction uses gpt-4o-mini. Both need approved credentials and live testing
   before being described as enabled or suitable for formal evaluation.
@@ -149,6 +157,13 @@ answerer experiment was not run. Retrieval proxies and synthetic cases do
 not demonstrate end-to-end answer accuracy or predict a 0.75 AML score.
 Prepared public data and local reports are not included in this repository.
 
+The final Smoke completed on October 29, 2026 at 20:44:18 Asia/Shanghai:
+0.601128 versus 0.703559 (-0.102431). A1, A2, C1 and Streaming Online declined;
+G2/G4 did not improve. Aggregate diagnostics cannot establish the exact
+per-question cause. One run per version is not a statistical comparison.
+No second v0.2.6 Smoke or Full was started. The production entry was restored
+to v0.2.5 only after confirming the new evaluation had finished.
+
 ### Authenticated public tests
 
 The manual `Authenticated Synthetic API Test` workflow runs the same bounded
@@ -199,7 +214,8 @@ existing Worker changes, model invocation or formal evaluation is automated.
 
 `pages-entry/` contains a minimal Cloudflare Pages advanced-mode entry used when
 a client network cannot reach `workers.dev`. It forwards the original request to
-the `sixteen-memory-v026` Worker through a Cloudflare Service binding.
+the retained `sixteen-memory-v025` Worker through a Cloudflare Service binding
+after the v0.2.6 experiment was rejected.
 It does not use public `fetch`, inject credentials, store data, log bodies or
 change the memory implementation. Keep the existing Pages project and public
 hostname. Before changing its backend, confirm that no evaluation is running,

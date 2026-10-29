@@ -4,9 +4,11 @@ A small, source-linked memory service for the Agent Memory Leaderboard (AML)
 open-source textual track. Team: **sixteen**. Maintainer: **Chengyuan Ma**.
 
 **Status:** the Python v0.1.0 baseline is preserved. The separate Cloudflare
-adapter completed Textual Smoke at v0.2.5 with score 0.703559; v0.2.6 is the
-next candidate. No Full score or public ranking is claimed. Production uses
-lexical retrieval, not a live model provider.
+adapter completed Textual Smoke at v0.2.5 with score 0.703559. The v0.2.6
+experiment scored 0.601128 and was rejected; the public Pages entry targets
+the retained v0.2.5 backend. Candidate v0.2.6 source remains for analysis.
+No Full score or public ranking is claimed. Production uses lexical retrieval,
+not a live model provider.
 See [cloudflare/README.md](cloudflare/README.md) for the serverless deployment.
 
 ## Method
