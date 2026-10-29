@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VERSION = "0.2.2";
+export const VERSION = "0.2.3";
 export const MAX_BODY = 2 * 1024 * 1024;
 
 const identifier = z.string().min(1).max(512);
@@ -148,7 +148,6 @@ export function terms(text: string): string[] {
 
 export function matchQuery(text: string): string | null {
   const words = [...new Set(terms(text))];
-  if (words.length > 512) throw new ServiceError(422, "Query exceeds 512 distinct lexical terms");
   return words.length ? words.map((word) => `"${word}"`).join(" OR ") : null;
 }
 

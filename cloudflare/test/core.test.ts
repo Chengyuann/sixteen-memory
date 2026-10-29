@@ -58,11 +58,14 @@ test("timestamps and roles preserved without fabrication", () => {
   }, 0.1), false);
 });
 
-test("FTS query is tokenized, quoted, supports CJK and bounded", () => {
+test("FTS query is tokenized, quoted and supports long ASCII and CJK queries", () => {
   assert.deepEqual(terms("ABC\u5317\u4eac 2026"), ["abc", "\u5317", "\u4eac", "2026"]);
   assert.equal(matchQuery('Alice" OR 1=1;'), '"alice" OR "or" OR "1"');
   assert.equal(matchQuery("...!!!"), null);
-  assert.throws(() => matchQuery(Array.from({ length: 513 }, (_, i) => `t${i}`).join(" ")), ServiceError);
+  assert.equal(matchQuery(Array.from({ length: 2000 }, (_, i) => `t${i}`).join(" "))!
+    .split(" OR ").length, 2000);
+  assert.equal(matchQuery(Array.from({ length: 513 }, (_, i) =>
+    String.fromCodePoint(0x4e00 + i)).join(""))!.split(" OR ").length, 513);
 });
 
 test("configuration fails closed without changing models silently", () => {

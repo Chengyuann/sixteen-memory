@@ -14,5 +14,5 @@ jobs:
           node-version: "24"
       - name: Check health and unauthenticated boundaries
         env:
-          PUBLIC_BASE_URL: https://sixteen-memory.mcy23.workers.dev
+          PUBLIC_BASE_URL: https://sixteen-memory-v023-entry.pages.dev
         run: node cloudflare/scripts/public-smoke.mjs

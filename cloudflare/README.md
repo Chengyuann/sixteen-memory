@@ -1,6 +1,6 @@
 # Sixteen Memory on Cloudflare
 
-Version **0.2.2**. A Worker exposes the AML textual Add/Search contract. Each
+Version **0.2.3**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
@@ -30,6 +30,7 @@ npm run test:runtime
 npm run test:extended
 npm run test:pages-entry
 npm run test:deep
+npm run test:long-query
 npm audit --registry=https://registry.npmjs.org --audit-level=high
 ```
 
@@ -42,6 +43,12 @@ requests. The long-source regression preserves identical text at different
 message positions and character offsets; v0.2.1 fixes over-aggressive deduplication.
 Version 0.2.2 accepts the case-insensitive HTTP Bearer authentication scheme
 while preserving exact constant-time comparison of the credential.
+Version 0.2.3 accepts long textual questions and options up to the existing
+bounded request-body and field limits instead of rejecting queries with more
+than 512 distinct lexical terms.
+Its configuration targets the separate `sixteen-memory-v023` Worker and
+`sixteen-memory-v023-entry` Pages project, with a new Durable Object namespace.
+The previously approved v0.2.1 deployment and its storage are not updated.
 The deep local suite exercises the declared 10,000-live-chunk boundary and
 overflow rollback, and invokes an actual local Durable Object alarm to verify
 physical deletion of source rows, retry rows and FTS rows.
@@ -100,7 +107,7 @@ existing Worker changes, model invocation or formal evaluation is automated.
 
 `pages-entry/` contains a minimal Cloudflare Pages advanced-mode entry used when
 a client network cannot reach `workers.dev`. It forwards the original request to
-the existing `sixteen-memory` Worker through a Cloudflare Service binding.
+the `sixteen-memory-v023` Worker through a Cloudflare Service binding.
 It does not use public `fetch`, inject credentials, store data, log bodies or
 change the memory implementation. Deploy it as a separate Pages project and
 verify the actual returned hostname before updating any approved AML binding.
@@ -118,7 +125,9 @@ verify the actual returned hostname before updating any approved AML binding.
   message. Unsupported inputs are rejected, never silently truncated.
 - Default 1,200 Unicode code-point chunks, with 160-code-point overlap.
 - Default 10,000 live chunks per user. Exceeding capacity returns 422.
-- Search supports at most 512 distinct lexical terms, including options.
+- Search uses all distinct lexical terms from the question and options. Request
+  size remains bounded by the 2 MiB JSON body limit, 32,000 UTF-16 code units in
+  `query`, and up to 100 options of at most 8,000 UTF-16 code units each.
 - Top-k is 1-100; lexical and vector candidate pools are at most 300 each.
 - Hybrid Add has at most 40 combined model requests and uses embedding batches
   of 10. Larger model workloads return 422 before provider calls.

@@ -188,9 +188,17 @@ export async function runAuthenticatedSuite({
       assert.equal((await add({ ...first, unexpected: "unknown" })).status, 422);
       assert.equal((await request("/v1/memories/add", null, { raw: "not-json" })).status, 400);
     });
-    await check("query and body limits reject explicitly, not by truncation", async () => {
-      const query = Array.from({ length: 513 }, (_, i) => `term${i}`).join(" ");
-      assert.equal((await search("a", query)).status, 422);
+    await check("long questions and options remain searchable without lexical-term rejection", async () => {
+      const query = ["marigold", ...Array.from({ length: 1999 }, (_, i) => `term${i}`)].join(" ");
+      const options = [Array.from({ length: 512 }, (_, i) => `option${i}`).join(" ")];
+      const memories = ok(await search("a", query, 100, { options })).data;
+      assert.equal(memories.length, 1);
+      assert.ok(memories[0].content.endsWith(first.messages[0].content));
+      const cjk = "杭州" + Array.from({ length: 513 }, (_, i) =>
+        String.fromCodePoint(0x4e00 + i)).join("");
+      assert.equal(ok(await search("unicode", cjk)).data.length, 1);
+    });
+    await check("oversized bodies reject explicitly, not by truncation", async () => {
       assert.equal((await request("/v1/memories/add", null, {
         raw: "x".repeat(2 * 1024 * 1024 + 1),
       })).status, 413);
