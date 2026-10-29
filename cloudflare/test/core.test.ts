@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
-  addSchema, chunkText, evidence, fingerprint, matchQuery, readJson, searchSchema,
+  addSchema, chunkText, contextualSource, evidence, fingerprint, focusedQuery, matchQuery, readJson, searchSchema,
   ServiceError, settings, sourceChunks, terms,
 } from "../src/core";
 import { Models } from "../src/models";
@@ -66,6 +66,36 @@ test("FTS query is tokenized, quoted and supports long ASCII and CJK queries", (
     .split(" OR ").length, 2000);
   assert.equal(matchQuery(Array.from({ length: 513 }, (_, i) =>
     String.fromCodePoint(0x4e00 + i)).join(""))!.split(" OR ").length, 513);
+});
+
+test("query focus preserves entities, numbers and negation without mutating the original", () => {
+  const query = "What did Alina not approve in 2026?";
+  assert.equal(focusedQuery(query), "alina not approve 2026");
+  assert.equal(query, "What did Alina not approve in 2026?");
+  assert.equal(focusedQuery("Who is it?"), "");
+  assert.equal(focusedQuery("杭州 桂花茶"), "杭 州 桂 花 茶");
+});
+
+test("context index uses only bounded previous questions for anaphoric answers", () => {
+  const request = addSchema.parse({
+    ...write, messages: [
+      { role: "user", content: "Where is the meetup?" },
+      { role: "assistant", content: "Host: It is at the riverside pavilion." },
+      { role: "user", content: "Private synthetic medical note." },
+    ],
+  });
+  const parts = sourceChunks(request, 1200);
+  assert.equal(contextualSource(request, parts[0]), "");
+  assert.equal(contextualSource(request, parts[1]), request.messages[0].content);
+  assert.equal(contextualSource(request, parts[2]), "");
+  const noQuestion = { ...request, messages: [
+    { role: "user" as const, content: "The location is confirmed." }, request.messages[1],
+  ] };
+  assert.equal(contextualSource(noQuestion, parts[1]), "");
+  const longQuestion = { ...request, messages: [
+    { role: "user" as const, content: "x".repeat(5000) + "?" }, request.messages[1],
+  ] };
+  assert.equal(contextualSource(longQuestion, parts[1]), longQuestion.messages[0].content.slice(-1200));
 });
 
 test("configuration fails closed without changing models silently", () => {

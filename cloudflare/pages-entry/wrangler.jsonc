@@ -6,7 +6,7 @@
   "services": [
     {
       "binding": "MEMORY_SERVICE",
-      "service": "sixteen-memory-v024"
+      "service": "sixteen-memory-v025"
     }
   ]
 }

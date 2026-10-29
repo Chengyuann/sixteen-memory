@@ -24,3 +24,4 @@ node_modules/
 !.dev.vars.example
 cloudflare/worker-configuration.d.ts
 cloudflare/dist-test/
+cloudflare/dist-ablation/

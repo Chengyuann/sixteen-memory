@@ -1,6 +1,6 @@
 # Sixteen Memory on Cloudflare
 
-Version **0.2.4**. A Worker exposes the AML textual Add/Search contract. Each
+Version **0.2.5**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
@@ -10,8 +10,8 @@ a serverless adapter, not a change to the original Python v0.1.0 baseline.
 - SQLite FTS5's BM25 ranks tokenized source chunks. CJK characters are separated.
 - Original source, source timestamps, message order and provenance are retained.
 - No LLM or embedding API is called in lexical mode.
-- v0.2.3 completed one Textual Smoke (46/46, score 0.6860). This is not a
-  Full score; the v0.2.4 candidate must pass a separate Smoke.
+- v0.2.3 and v0.2.4 completed Textual Smoke (46/46), scoring 0.6860 and
+  0.6984 respectively. These are not Full scores; v0.2.5 needs a new Smoke.
 - Hybrid mode adds text-embedding-v4 and RRF. Optional source-linked fact
   extraction uses gpt-4o-mini. Both need approved credentials and live testing
   before being described as enabled or suitable for formal evaluation.
@@ -33,6 +33,7 @@ npm run test:pages-entry
 npm run test:deep
 npm run test:long-query
 npm run test:retrieval
+npm run test:context
 npm audit --registry=https://registry.npmjs.org --audit-level=high
 ```
 
@@ -53,7 +54,12 @@ fusion, source-time/write-order tie-breaking, bounded rule context expansion,
 and timeline coverage for explicit overview requests. It returns original
 evidence, not generated summaries or answers. The schema fingerprint is bumped
 because the tokenizer changes. Existing storage must not be reused.
-Its configuration targets the separate `sixteen-memory-v024` Worker with a
+Version 0.2.5 adds a focused-query rank list without dropping the original
+query, a low-weight preceding-question index for anaphoric answers, and
+same-session rule windows that can cross Add request boundaries. These are
+retrieval heuristics, not semantic state extraction, privacy filtering or
+generated answers. Schema fingerprint 3 requires a fresh storage namespace.
+Its configuration targets the separate `sixteen-memory-v025` Worker with a
 new Durable Object namespace. The existing `sixteen-memory-entry.pages.dev`
 address forwards to this Worker after the new AML version is registered using
 the same Add/Search URLs. A new version does not require a new public address.
@@ -69,6 +75,48 @@ semantics without copying its Durable Object storage or embedding a service key.
 The retrieval-quality suite is hand-authored synthetic regression coverage,
 not an estimate of AML scores. To compare an archived baseline bundle, place
 it in the local `dist/` directory and set `BASELINE_BUNDLE=dist/baseline.js`.
+
+### Offline ablation study
+
+`scripts/ablation-runtime.mjs` builds isolated experimental variants from
+commit `cb0d700206e96b5ea00e280d00a4da1c3dea3a7d`. It never changes the deployed
+system and never submits an official evaluation. The historical commit must
+be available locally. The three variant digits mean:
+
+1. query focus: 0 off / 1 on;
+2. context index: 0 none / 1 all neighbours / 2 bounded previous-question cue;
+3. rule window: 0 same Add request / 1 same session.
+
+Twelve variants were compared on 519 public LoCoMo-Refined development queries
+and 24 synthetic rule/privacy cases. Variant **121** was selected before
+evaluating the disjoint 336-query conversation holdout and 72 deterministic,
+stratified LongMemEval-S cases. Public evidence annotations stay in the scoring
+harness; answers, evidence labels and supplied summaries are never sent to
+Add/Search. No private AML question or gold data was used.
+
+| Retrieval measure | v0.2.4 | Selected variant |
+|---|---:|---:|
+| LoCoMo development turn recall@10 | 0.5973 | 0.6758 |
+| LoCoMo holdout turn recall@10 | 0.6436 | 0.7063 |
+| LoCoMo holdout turn recall@100 | 0.8524 | 0.8946 |
+| LongMemEval external session recall@10 | 0.8824 | 0.9056 |
+| LongMemEval external session recall@100 | 1.0000 | 1.0000 |
+
+These are retrieval-only engineering results, not QA accuracy, statistically
+established gains, or predictions of AML scores. LongMemEval's knowledge-update
+and single-session-user strata regressed slightly at rank 10. Unconditional
+neighbour indexing performed better on recall but failed all 12 synthetic
+minimal-disclosure checks and was rejected. The selected gate is narrower,
+not a general privacy guarantee. Dataset splits and source checksums are
+recorded in the local study output; raw public benchmark data is not bundled.
+
+The study accepts `STUDY_OUTPUT`, `STUDY_DATA`, `STUDY_SPLIT`,
+`STUDY_VARIANTS` and `STUDY_RUN`. For example, with prepared public inputs:
+
+```bash
+STUDY_SPLIT=synthetic STUDY_VARIANTS=000,100,020,001,120,101,021,121 \
+  node scripts/ablation-runtime.mjs
+```
 
 ### Authenticated public tests
 
@@ -120,7 +168,7 @@ existing Worker changes, model invocation or formal evaluation is automated.
 
 `pages-entry/` contains a minimal Cloudflare Pages advanced-mode entry used when
 a client network cannot reach `workers.dev`. It forwards the original request to
-the `sixteen-memory-v024` Worker through a Cloudflare Service binding.
+the `sixteen-memory-v025` Worker through a Cloudflare Service binding.
 It does not use public `fetch`, inject credentials, store data, log bodies or
 change the memory implementation. Keep the existing Pages project and public
 hostname. Before changing its backend, confirm that no evaluation is running,
@@ -144,12 +192,19 @@ Add/Search after deployment, then start a new Smoke under the new version ID.
 - Search uses all distinct lexical terms from the question and options. Request
   size remains bounded by the 2 MiB JSON body limit, 32,000 UTF-16 code units in
   `query`, and up to 100 options of at most 8,000 UTF-16 code units each.
-- Top-k is 1-100; each of the question-only and question+options lexical
-  candidate lists contains at most 300 records. Nonempty lists receive relative
-  weights 2:1; the vector candidate list remains at most 300.
+- Top-k is 1-100; each of the original question, focused question (if different
+  and nonempty), and question+options lists contains at most 300 candidates.
+  Nonempty lists receive weights 2:2:1 respectively. The original query and
+  options are never silently discarded; vector candidates remain at most 300.
+- An anaphoric answer may index the final 1,200 UTF-16 code units of the
+  preceding question within its Add request, with BM25 column weight 0.25.
+  Context is not copied into returned evidence. The English cue recognizer is
+  heuristic and may miss associations or infer a wrong one.
 - Rule/procedure queries may expand the top four anchors to up to 24 chunks
-  from each anchor's own Add request. This heuristic does not classify or
-  redact sensitive source content; unrelated ordinary queries do not expand.
+  from each anchor's own session, ordered by stored row proximity. This crosses
+  Add boundaries but never user boundaries. Concurrent/out-of-order ingestion
+  may differ from source order. This heuristic does not classify or redact
+  sensitive source content; unrelated ordinary queries do not expand.
 - Explicit summaries/overviews add up to top-k evenly spaced source chunks
   across the retained user timeline. This is source sampling, not semantic
   summarization; topic-specific summaries can include unrelated history.
@@ -192,6 +247,12 @@ Do not submit official benchmark content until this issue is resolved.
 - Cloudflare SQLite storage:
   https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/
 - SQLite FTS5: https://www.sqlite.org/fts5.html
+- Public LoCoMo-Refined (CC BY-NC 4.0):
+  https://github.com/mem-eval-suite/LoCoMo_refined
+- Public LongMemEval:
+  https://github.com/xiaowu0162/LongMemEval
+- LongMemEval-S cleaned:
+  https://huggingface.co/datasets/xiaowu0162/longmemeval-cleaned
 
 Original memory-system design and source are by the sixteen team with AI coding
 assistance. FTS5/BM25, standard RRF, Zod, Cloudflare tooling and separately

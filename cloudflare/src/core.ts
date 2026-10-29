@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VERSION = "0.2.4";
+export const VERSION = "0.2.5";
 export const MAX_BODY = 2 * 1024 * 1024;
 
 const identifier = z.string().min(1).max(512);
@@ -113,7 +113,7 @@ export function settings(vars: object): Settings {
 export function fingerprint(config: Settings): string {
   // Capacity and retention can change; representation changes require a fresh namespace.
   return JSON.stringify({
-    schema: 2, mode: config.mode, facts: config.facts, dimensions: config.dimensions,
+    schema: 3, mode: config.mode, facts: config.facts, dimensions: config.dimensions,
     chunkChars: config.chunkChars, embeddingUrl: config.embeddingUrl,
     embeddingModel: config.embeddingModel, llmUrl: config.llmUrl, llmModel: config.llmModel,
     submission: config.submission,
@@ -195,4 +195,18 @@ export function evidence(id: string, row: Chunk & { session_id: string; request_
     id, content: `${metadata}\n${row.source}`, score,
     ...(timestamp === null ? {} : { created_at: timestamp }),
   };
+}
+
+const queryStopwords = new Set(["a","an","the","is","are","was","were","be","been","being","do","does","did","have","has","had","can","could","would","should","will","shall","may","might","must","i","me","my","mine","we","us","our","ours","you","your","yours","he","him","his","she","her","hers","it","its","they","them","their","theirs","what","which","who","whom","whose","when","where","why","how","that","this","these","those","am","as","at","by","for","from","in","into","of","on","onto","to","with","and","or","but","if","then","than","so","because","about","please","tell","give","describe","explain","find","know","remember","recall"]);
+export function focusedQuery(query: string): string {
+  const words = terms(query);
+  return words.filter((word) => !queryStopwords.has(word)).join(" ");
+}
+
+export function contextualSource(request: AddRequest, part: Chunk): string {
+  const previous = request.messages[part.position - 1]?.content ?? "";
+  const current = request.messages[part.position].content.replace(/^[^:\n]{1,50}:\s*/, "");
+  const anaphoric = /^(?:yes|no|it|they|this|that|these|those|there|thanks|depends|varies|about|for|we|i)\b/iu.test(current);
+  if (!anaphoric || !previous.includes("?")) return "";
+  return previous.slice(-1200);
 }
