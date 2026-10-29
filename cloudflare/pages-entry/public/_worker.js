@@ -9,7 +9,7 @@ export default {
     // deployment. The binding name, not this URL, selects the destination.
     const target = new URL(request.url);
     target.protocol = "https:";
-    target.host = "sixteen-memory-v023.mcy23.workers.dev";
+    target.host = "sixteen-memory-v024.mcy23.workers.dev";
     return env.MEMORY_SERVICE.fetch(new Request(target, request));
   },
 };

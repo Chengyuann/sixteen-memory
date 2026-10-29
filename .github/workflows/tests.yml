@@ -37,4 +37,5 @@ jobs:
       - run: npm run test:pages-entry
       - run: npm run test:deep
       - run: npm run test:long-query
+      - run: npm run test:retrieval
       - run: npm audit --registry=https://registry.npmjs.org --audit-level=high

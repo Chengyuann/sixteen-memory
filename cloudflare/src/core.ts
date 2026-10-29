@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const VERSION = "0.2.3";
+export const VERSION = "0.2.4";
 export const MAX_BODY = 2 * 1024 * 1024;
 
 const identifier = z.string().min(1).max(512);
@@ -113,7 +113,7 @@ export function settings(vars: object): Settings {
 export function fingerprint(config: Settings): string {
   // Capacity and retention can change; representation changes require a fresh namespace.
   return JSON.stringify({
-    schema: 1, mode: config.mode, facts: config.facts, dimensions: config.dimensions,
+    schema: 2, mode: config.mode, facts: config.facts, dimensions: config.dimensions,
     chunkChars: config.chunkChars, embeddingUrl: config.embeddingUrl,
     embeddingModel: config.embeddingModel, llmUrl: config.llmUrl, llmModel: config.llmModel,
     submission: config.submission,
@@ -149,6 +149,13 @@ export function terms(text: string): string[] {
 export function matchQuery(text: string): string | null {
   const words = [...new Set(terms(text))];
   return words.length ? words.map((word) => `"${word}"`).join(" OR ") : null;
+}
+
+export function retrievalIntent(query: string): { overview: boolean; context: boolean } {
+  return {
+    overview: /\b(?:summari[sz]e|summary|overview|overall|trajectory|trends?)\b|总结|概述|综述|总览|整体|变化趋势/iu.test(query),
+    context: /\b(?:rules?|polic(?:y|ies)|procedures?|workflows?|instructions?|protocols?|algorithms?|steps?|calculate|compute|simulate|simulation|formula|formulas)\b|规则|政策|流程|步骤|指令|算法|计算|模拟|公式/iu.test(query),
+  };
 }
 
 export async function sha256(text: string): Promise<string> {

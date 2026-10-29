@@ -80,6 +80,13 @@ try {
     search(generatedTerms(1999) + " needle")));
   assert.ok(concurrent.every((r) => JSON.stringify(r.data) === JSON.stringify(baseline)));
   assert.deepEqual((await search("shared")).data, common);
+  for (const query of ["Summarize my history", "shared rule procedure"]) {
+    const result = await search(query);
+    assert.equal(result.data.data.length, 100);
+    assert.equal(new Set(result.data.data.map((row) => row.id)).size, 100);
+    assert.ok(result.ms < 20000);
+    report.cases.push({ name: query, result_count: 100, ms: result.ms });
+  }
   report.concurrent_searches = 16;
   report.concurrent_max_ms = Math.max(...concurrent.map((r) => r.ms));
   report.short_query_order_preserved = true;

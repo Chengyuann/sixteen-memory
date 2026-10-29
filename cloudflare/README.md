@@ -1,6 +1,6 @@
 # Sixteen Memory on Cloudflare
 
-Version **0.2.3**. A Worker exposes the AML textual Add/Search contract. Each
+Version **0.2.4**. A Worker exposes the AML textual Add/Search contract. Each
 `(SUBMISSION_ID, user_id)` gets a separate SQLite-backed Durable Object. This is
 a serverless adapter, not a change to the original Python v0.1.0 baseline.
 
@@ -10,7 +10,8 @@ a serverless adapter, not a change to the original Python v0.1.0 baseline.
 - SQLite FTS5's BM25 ranks tokenized source chunks. CJK characters are separated.
 - Original source, source timestamps, message order and provenance are retained.
 - No LLM or embedding API is called in lexical mode.
-- Retrieval is functional but no competition effectiveness has been measured.
+- v0.2.3 completed one Textual Smoke (46/46, score 0.6860). This is not a
+  Full score; the v0.2.4 candidate must pass a separate Smoke.
 - Hybrid mode adds text-embedding-v4 and RRF. Optional source-linked fact
   extraction uses gpt-4o-mini. Both need approved credentials and live testing
   before being described as enabled or suitable for formal evaluation.
@@ -31,6 +32,7 @@ npm run test:extended
 npm run test:pages-entry
 npm run test:deep
 npm run test:long-query
+npm run test:retrieval
 npm audit --registry=https://registry.npmjs.org --audit-level=high
 ```
 
@@ -46,12 +48,17 @@ while preserving exact constant-time comparison of the credential.
 Version 0.2.3 accepts long textual questions and options up to the existing
 bounded request-body and field limits instead of rejecting queries with more
 than 512 distinct lexical terms.
-Its configuration targets the separate `sixteen-memory-v023` Worker with a
+Version 0.2.4 uses FTS5 Porter stemming, question-prioritized weighted rank
+fusion, source-time/write-order tie-breaking, bounded rule context expansion,
+and timeline coverage for explicit overview requests. It returns original
+evidence, not generated summaries or answers. The schema fingerprint is bumped
+because the tokenizer changes. Existing storage must not be reused.
+Its configuration targets the separate `sixteen-memory-v024` Worker with a
 new Durable Object namespace. The existing `sixteen-memory-entry.pages.dev`
 address forwards to this Worker after the new AML version is registered using
 the same Add/Search URLs. A new version does not require a new public address.
-The old v0.2.1 Worker and its storage remain unchanged, but the shared public
-address now serves v0.2.3: never resume or start a v0.2.1 evaluation through it.
+Previous Workers and their storage remain unchanged. Once the shared public
+address serves a new version, never run an older-version evaluation through it.
 The deep local suite exercises the declared 10,000-live-chunk boundary and
 overflow rollback, and invokes an actual local Durable Object alarm to verify
 physical deletion of source rows, retry rows and FTS rows.
@@ -59,6 +66,9 @@ The Pages-entry suite runs the same bounded authenticated checks through a
 transparent Service binding entry. It verifies that this alternate hostname
 preserves the existing Worker's authentication, persistence and response
 semantics without copying its Durable Object storage or embedding a service key.
+The retrieval-quality suite is hand-authored synthetic regression coverage,
+not an estimate of AML scores. To compare an archived baseline bundle, place
+it in the local `dist/` directory and set `BASELINE_BUNDLE=dist/baseline.js`.
 
 ### Authenticated public tests
 
@@ -110,7 +120,7 @@ existing Worker changes, model invocation or formal evaluation is automated.
 
 `pages-entry/` contains a minimal Cloudflare Pages advanced-mode entry used when
 a client network cannot reach `workers.dev`. It forwards the original request to
-the `sixteen-memory-v023` Worker through a Cloudflare Service binding.
+the `sixteen-memory-v024` Worker through a Cloudflare Service binding.
 It does not use public `fetch`, inject credentials, store data, log bodies or
 change the memory implementation. Keep the existing Pages project and public
 hostname. Before changing its backend, confirm that no evaluation is running,
@@ -134,7 +144,18 @@ Add/Search after deployment, then start a new Smoke under the new version ID.
 - Search uses all distinct lexical terms from the question and options. Request
   size remains bounded by the 2 MiB JSON body limit, 32,000 UTF-16 code units in
   `query`, and up to 100 options of at most 8,000 UTF-16 code units each.
-- Top-k is 1-100; lexical and vector candidate pools are at most 300 each.
+- Top-k is 1-100; each of the question-only and question+options lexical
+  candidate lists contains at most 300 records. Nonempty lists receive relative
+  weights 2:1; the vector candidate list remains at most 300.
+- Rule/procedure queries may expand the top four anchors to up to 24 chunks
+  from each anchor's own Add request. This heuristic does not classify or
+  redact sensitive source content; unrelated ordinary queries do not expand.
+- Explicit summaries/overviews add up to top-k evenly spaced source chunks
+  across the retained user timeline. This is source sampling, not semantic
+  summarization; topic-specific summaries can include unrelated history.
+- English Porter stemming can conflate distinct word forms. Non-English text
+  retains the existing Unicode/CJK handling. Equal lexical scores prefer newer
+  source timestamps, then later writes; no prior source records are deleted.
 - Hybrid Add has at most 40 combined model requests and uses embedding batches
   of 10. Larger model workloads return 422 before provider calls.
 - Optional vectors are scanned exactly within the current user. Full-size

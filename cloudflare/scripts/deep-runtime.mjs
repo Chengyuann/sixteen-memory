@@ -55,6 +55,8 @@ try {
   assert.ok(before.alarm > Date.now()); checks++;
   await expiryStub.testExpireAndSchedule();
   assert.equal((await post("search", query("expiry", "Deep"))).data.data.length, 0); checks++;
+  assert.deepEqual((await post("search", query("expiry", "Summarize my history"))).data, { data: [] }); checks++;
+  assert.deepEqual((await post("search", query("expiry", "Deep rule"))).data, { data: [] }); checks++;
   let after;
   for (let i = 0; i < 30; i++) {
     after = JSON.parse(await expiryStub.testStorageCounts());

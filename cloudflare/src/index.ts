@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
 import {
   addSchema, evidence, fingerprint, matchQuery, readJson, searchSchema, ServiceError,
-  settings, sha256, sourceChunks, terms, VERSION,
+  retrievalIntent, settings, sha256, sourceChunks, terms, VERSION,
   type AddRequest, type Chunk, type SearchRequest, type Settings,
 } from "./core";
 import { Models, type ModelSecrets } from "./models";
@@ -50,8 +50,9 @@ export class UserMemory extends DurableObject<RuntimeEnv> {
           embedding BLOB, expires INTEGER NOT NULL
         );
         CREATE INDEX IF NOT EXISTS chunk_expiry ON chunks(expires);
+        CREATE INDEX IF NOT EXISTS chunk_request ON chunks(request_id,position,offset);
         CREATE INDEX IF NOT EXISTS write_expiry ON writes(expires);
-        CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(source, facts);
+        CREATE VIRTUAL TABLE IF NOT EXISTS search_index USING fts5(source, facts, tokenize='porter unicode61');
       `);
     });
   }
@@ -164,15 +165,22 @@ export class UserMemory extends DurableObject<RuntimeEnv> {
       const config = settings(this.env);
       this.lockConfig(request.user_id, config);
       const query = [request.query, ...(request.options ?? [])].join("\n");
-      const match = matchQuery(query);
       const ranked = new Map<string, number>();
-      if (match) {
-        const found = this.sql.exec<{ id: string }>(
+      const searches = [{ text: request.query, weight: 2 }];
+      if (request.options?.length) searches.push({ text: query, weight: 1 });
+      const lists = searches.map(({ text, weight }) => {
+        const match = matchQuery(text);
+        const found = match ? this.sql.exec<{ id: string }>(
           `SELECT c.id FROM search_index JOIN chunks c ON c.rowid=search_index.rowid
            WHERE search_index MATCH ? AND c.expires>?
-           ORDER BY bm25(search_index), c.rowid LIMIT 300`, match, Date.now(),
-        ).toArray();
-        found.forEach((row, index) => ranked.set(row.id, 1 / (61 + index)));
+           ORDER BY bm25(search_index), c.timestamp DESC, c.rowid DESC LIMIT 300`, match, Date.now(),
+        ).toArray() : [];
+        return { found, weight };
+      }).filter(({ found }) => found.length);
+      const totalWeight = lists.reduce((sum, list) => sum + list.weight, 0);
+      for (const { found, weight } of lists) {
+        found.forEach((row, index) =>
+          ranked.set(row.id, (ranked.get(row.id) ?? 0) + weight / totalWeight / (61 + index)));
       }
       if (config.mode === "hybrid") {
         const count = this.sql.exec<{ n: number }>(
@@ -194,6 +202,39 @@ export class UserMemory extends DurableObject<RuntimeEnv> {
           similarities.sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
           similarities.slice(0, 300).forEach((row, index) =>
             ranked.set(row.id, (ranked.get(row.id) ?? 0) + 1 / (61 + index)));
+        }
+      }
+      const intent = retrievalIntent(request.query);
+      if (intent.overview) {
+        // Cover the whole retained timeline, not only repeated query words.
+        const timeline = this.sql.exec<{ id: string }>(
+          "SELECT id FROM chunks WHERE expires>? ORDER BY timestamp, rowid", Date.now(),
+        ).toArray();
+        const count = Math.min(request.top_k, timeline.length);
+        for (let i = 0; i < count; i++) {
+          const index = count === 1 ? timeline.length - 1
+            : Math.round(i * (timeline.length - 1) / (count - 1));
+          const id = timeline[index].id;
+          ranked.set(id, (ranked.get(id) ?? 0) + 1 / (61 + i));
+        }
+      }
+      if (intent.context) {
+        // Neighbouring source passages can define a matched rule or its variables.
+        const anchors = [...ranked].sort((a, b) => b[1] - a[1]).slice(0, 4);
+        for (const [id, score] of anchors) {
+          const anchor = this.sql.exec<{ request_id: string; position: number; offset: number }>(
+            "SELECT request_id,position,offset FROM chunks WHERE id=? AND expires>?", id, Date.now(),
+          ).toArray()[0];
+          if (!anchor) continue;
+          const related = this.sql.exec<{ id: string }>(
+            `SELECT id FROM chunks WHERE request_id=? AND expires>?
+             ORDER BY abs(position-?),abs(offset-?),rowid LIMIT 24`,
+            anchor.request_id, Date.now(), anchor.position, anchor.offset,
+          ).toArray();
+          related.forEach((row, index) => {
+            const contextualScore = score * 0.95 / (1 + index * 0.05);
+            ranked.set(row.id, Math.max(ranked.get(row.id) ?? 0, contextualScore));
+          });
         }
       }
       const data = [];

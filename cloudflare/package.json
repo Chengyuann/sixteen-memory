@@ -1,6 +1,6 @@
 {
   "name": "sixteen-memory-cloudflare",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,7 @@
     "test:pages-entry": "node scripts/pages-entry-runtime.mjs",
     "test:deep": "wrangler deploy test/alarm-harness.ts --dry-run --outdir dist-test && node scripts/deep-runtime.mjs",
     "test:long-query": "node scripts/long-query-runtime.mjs",
+    "test:retrieval": "node scripts/retrieval-quality.mjs",
     "dev": "wrangler dev",
     "build": "wrangler deploy --dry-run",
     "deploy": "wrangler deploy"
