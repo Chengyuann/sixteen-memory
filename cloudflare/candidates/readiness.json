@@ -1,0 +1,137 @@
+{
+  "created_at": "2026-10-29T16:18:34.800964+00:00",
+  "selection_sha256": "e97601334f6b70abcaeb0979534848ab3abac647618de0dab82bac945349b135",
+  "variants": {
+    "T03": {
+      "source_sha256": "a94ba34cf3ba1c5e0c732ce6fd5d2fe0b57f207d4ef6f9b1eef033afdc09d01b",
+      "config_sha256": "61fa7f0c0876598f2fb5de0d92025052680e89df3429bc395f74f311fbda43e7",
+      "files": {
+        "cloudflare/candidates/T03/index.ts": "9a996c1cc1e1ff39542458a21f689a894c6748b78bc47c16f65b7984cb622147",
+        "cloudflare/candidates/T03/core.ts": "92567946f63852de6c612f03c0c3a1f210983e00e63eba0f50d88bf5b8c4060e",
+        "cloudflare/candidates/T03/models.ts": "d0c7807992117164c9f4633cc57c62d5a2c80dfca1b014c5e2a97535e2fc875d",
+        "cloudflare/candidates/rerank.ts": "fa7d128113bd4d60372804623024896c5df86c2cb035be5c7cee9d66ed6757d2",
+        "cloudflare/candidates/BASE/core.ts": "65f064fc5c5383cf610e756e491f22bb59348d9a892ad7b20b72cb21c97a95a2"
+      },
+      "splits": {
+        "validation": {
+          "questions": 98,
+          "score": 92.36797802587276,
+          "delta": 0.6189083820662802,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 5,
+          "regressed": 3,
+          "source_coverage100": 0.9864035087719298
+        },
+        "regression": {
+          "questions": 855,
+          "score": 66.57363712368269,
+          "delta": 0.0,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 0,
+          "regressed": 0,
+          "source_coverage100": 0.8033656005601354
+        },
+        "diagnostic": {
+          "questions": 120,
+          "score": 100,
+          "delta": 0,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 0,
+          "regressed": 0,
+          "source_coverage100": 1
+        }
+      }
+    },
+    "T04": {
+      "source_sha256": "b7ae02aeb8fb42451f4ed7ee919e72b8e48cfdbe436687e851be1560e918f3d6",
+      "config_sha256": "87ae59cebed87ac36f1ab184bf8264ddca07d15ba9f10a2917303b28f3a820c8",
+      "files": {
+        "cloudflare/candidates/T04/index.ts": "a7ed28bb3641f32f89d3f5ce742f16e5166c1eba04025b6b597c6692fd572adc",
+        "cloudflare/candidates/T04/core.ts": "7680f0d5abe6608773d6608828b187b219332bb5d18de4e06187550ba499e882",
+        "cloudflare/candidates/T04/models.ts": "d0c7807992117164c9f4633cc57c62d5a2c80dfca1b014c5e2a97535e2fc875d",
+        "cloudflare/candidates/rerank.ts": "fa7d128113bd4d60372804623024896c5df86c2cb035be5c7cee9d66ed6757d2",
+        "cloudflare/candidates/BASE/core.ts": "65f064fc5c5383cf610e756e491f22bb59348d9a892ad7b20b72cb21c97a95a2"
+      },
+      "splits": {
+        "validation": {
+          "questions": 98,
+          "score": 92.53854332801701,
+          "delta": 0.7894736842105345,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 3,
+          "regressed": 0,
+          "source_coverage100": 0.9864035087719298
+        },
+        "regression": {
+          "questions": 855,
+          "score": 66.57363712368269,
+          "delta": 0.0,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 0,
+          "regressed": 0,
+          "source_coverage100": 0.8033656005601354
+        },
+        "diagnostic": {
+          "questions": 120,
+          "score": 100,
+          "delta": 0,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 0,
+          "regressed": 0,
+          "source_coverage100": 1
+        }
+      }
+    },
+    "T05": {
+      "source_sha256": "128855d1f76ec7bac5ad81c52951cb6b49224d0339180e761aa13d159495c9b6",
+      "config_sha256": "fcbb697b180f821626e20497445a78eaef1ad5d0b0b70de42ca830ad0083128e",
+      "files": {
+        "cloudflare/candidates/T05/index.ts": "ba9b1a117fb0e2fed41aa9dfdf2bbe7218abd99ad5fe6033db901c3d9c4997f9",
+        "cloudflare/candidates/T05/core.ts": "7727a31b7a27282e5409278af3a8764c46956547f4bc075d3598f9267ab82fcc",
+        "cloudflare/candidates/T05/models.ts": "d0c7807992117164c9f4633cc57c62d5a2c80dfca1b014c5e2a97535e2fc875d",
+        "cloudflare/candidates/rerank.ts": "fa7d128113bd4d60372804623024896c5df86c2cb035be5c7cee9d66ed6757d2",
+        "cloudflare/candidates/BASE/core.ts": "65f064fc5c5383cf610e756e491f22bb59348d9a892ad7b20b72cb21c97a95a2"
+      },
+      "splits": {
+        "validation": {
+          "questions": 98,
+          "score": 92.01222753854333,
+          "delta": 0.2631578947368496,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 1,
+          "regressed": 0,
+          "source_coverage100": 0.9864035087719298
+        },
+        "regression": {
+          "questions": 855,
+          "score": 68.16070673672132,
+          "delta": 1.5870696130386364,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 16,
+          "regressed": 1,
+          "source_coverage100": 0.8033656005601354
+        },
+        "diagnostic": {
+          "questions": 120,
+          "score": 100,
+          "delta": 0,
+          "set_preservation": true,
+          "python_metric_parity": true,
+          "improved": 0,
+          "regressed": 0,
+          "source_coverage100": 1
+        }
+      }
+    }
+  },
+  "all_passed": true,
+  "caveat": "Retrieval proxies, not answer accuracy; baseline privacy diagnostic issues remain."
+}

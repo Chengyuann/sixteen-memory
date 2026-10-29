@@ -1,0 +1,322 @@
+[
+  {
+    "id": "BASE",
+    "selected": false,
+    "development": {
+      "evidence_score": 89.53632819422293,
+      "recall10": 0.853160552897395,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 91.7490696438065,
+      "recall10": 0.8593500797448166,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 66.5736371236827,
+      "recall10": 0.5930960684844642,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T01",
+    "selected": false,
+    "development": {
+      "evidence_score": 89.25855041644516,
+      "recall10": 0.853160552897395,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 1,
+      "regressed": 2,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 92.01222753854333,
+      "recall10": 0.8602760056707425,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 1,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 66.49140028157744,
+      "recall10": 0.5852629267068273,
+      "recall100": 0.7916390656611408,
+      "source_coverage100": 0.7916390656611408,
+      "improved": 4,
+      "regressed": 4,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T02",
+    "selected": false,
+    "development": {
+      "evidence_score": 89.51293638135743,
+      "recall10": 0.8546371610845295,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 1,
+      "regressed": 2,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 92.27538543328016,
+      "recall10": 0.8632243487506646,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 2,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 67.58054303680889,
+      "recall10": 0.6158591131443065,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 10,
+      "regressed": 0,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T03",
+    "selected": true,
+    "development": {
+      "evidence_score": 90.50855041644516,
+      "recall10": 0.8655435938330676,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 5,
+      "regressed": 0,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 92.36797802587276,
+      "recall10": 0.8690479354953039,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 5,
+      "regressed": 3,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 66.5736371236827,
+      "recall10": 0.5930960684844642,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T04",
+    "selected": true,
+    "development": {
+      "evidence_score": 90.63281942229311,
+      "recall10": 0.8711430090377459,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 4,
+      "regressed": 0,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 92.53854332801701,
+      "recall10": 0.8665138224348751,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 3,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 66.5736371236827,
+      "recall10": 0.5930960684844642,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T05",
+    "selected": true,
+    "development": {
+      "evidence_score": 89.79948608895978,
+      "recall10": 0.853160552897395,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 1,
+      "regressed": 0,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 92.01222753854333,
+      "recall10": 0.8602760056707425,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 1,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 68.16070673672132,
+      "recall10": 0.6125379100990428,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 16,
+      "regressed": 1,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T06",
+    "selected": false,
+    "development": {
+      "evidence_score": 89.36088959773171,
+      "recall10": 0.853160552897395,
+      "recall100": 0.958625730994152,
+      "source_coverage100": 0.9580298883507774,
+      "improved": 0,
+      "regressed": 1,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 91.7490696438065,
+      "recall10": 0.8502591706539075,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 66.5736371236827,
+      "recall10": 0.5930960684844642,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  },
+  {
+    "id": "T07",
+    "selected": false,
+    "development": {
+      "evidence_score": 89.81410597200072,
+      "recall10": 0.8514061669324827,
+      "recall100": 0.9575730994152046,
+      "source_coverage100": 0.9569772567718301,
+      "improved": 1,
+      "regressed": 0,
+      "errors": 0
+    },
+    "validation": {
+      "evidence_score": 91.7490696438065,
+      "recall10": 0.8575956937799043,
+      "recall100": 0.9864035087719298,
+      "source_coverage100": 0.9864035087719298,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    },
+    "regression": {
+      "evidence_score": 66.73811080789322,
+      "recall10": 0.593849080532657,
+      "recall100": 0.8033656005601353,
+      "source_coverage100": 0.8033656005601353,
+      "improved": 1,
+      "regressed": 0,
+      "errors": 0
+    },
+    "diagnostic": {
+      "evidence_score": 100.0,
+      "recall10": 1.0,
+      "recall100": 1.0,
+      "source_coverage100": 1.0,
+      "improved": 0,
+      "regressed": 0,
+      "errors": 0
+    }
+  }
+]

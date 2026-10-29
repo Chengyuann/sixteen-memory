@@ -1,0 +1,45 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "sixteen-memory-v027",
+  "main": "index.ts",
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "preview_urls": false,
+  "upload_source_maps": true,
+  "observability": {
+    "enabled": false
+  },
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "MEMORY",
+        "class_name": "UserMemory"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "UserMemory"
+      ]
+    }
+  ],
+  "vars": {
+    "MEMORY_MODE": "lexical",
+    "ENABLE_FACTS": "false",
+    "EMBEDDING_BASE_URL": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "EMBEDDING_MODEL": "text-embedding-v4",
+    "EMBEDDING_DIMENSIONS": "1024",
+    "LLM_BASE_URL": "https://api.openai.com/v1",
+    "LLM_MODEL": "gpt-4o-mini",
+    "CHUNK_CHARS": "1200",
+    "MAX_CHUNKS_PER_USER": "10000",
+    "RETENTION_DAYS": "7",
+    "SUBMISSION_ID": "sixteen-memory-cf-v0.2.7",
+    "SOURCE_COMMIT": "unreleased"
+  }
+}
