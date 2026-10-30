@@ -43,6 +43,10 @@ jobs:
       - run: npm run test:long-query
       - run: npm run test:retrieval
       - run: npm run test:context
+      - name: GOLD capacity and persistence regression (local only)
+        env:
+          OUTPUT: ${{ runner.temp }}/sixteen-gold-runtime
+        run: node candidates/GOLD/runtime.mjs
       - name: Isolated candidate integration
         run: OUTPUT=/tmp/sixteen-candidate-integration node candidates/integration.mjs
       - run: npm audit --registry=https://registry.npmjs.org --audit-level=high
