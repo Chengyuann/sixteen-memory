@@ -41,6 +41,8 @@ jobs:
       - run: npm run test:runtime
       - run: npm run test:extended
       - run: npm run test:pages-entry
+      - name: Isolated custom-domain entry regression (local only)
+        run: node scripts/api-entry-runtime.mjs
       - run: npm run test:deep
       - run: npm run test:long-query
       - run: npm run test:retrieval
