@@ -35,6 +35,8 @@ jobs:
       - run: npm run types
       - run: npm run typecheck
       - run: npm test
+      - name: Operator-only connection and pinned-health tests
+        run: node --test test/memory-transport.test.mjs
       - run: npx wrangler deploy --dry-run --outdir dist
       - run: npm run test:runtime
       - run: npm run test:extended

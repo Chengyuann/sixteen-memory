@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { checkHealth } from "./memory-transport.mjs";
 
 const base = new URL(process.env.PUBLIC_BASE_URL);
 if (base.protocol !== "https:") throw new Error("Public smoke requires HTTPS");
@@ -8,12 +9,9 @@ const get = (path, init = {}) => fetch(new URL(path, base), {
 const response = await get("/health");
 assert.equal(response.status, 200);
 const health = await response.json();
-assert.equal(health.status, "ok");
-assert.match(health.version, /^0\.2\.\d+$/);
-assert.equal(health.mode, "lexical");
-assert.equal(health.facts, false);
-assert.equal(health.authenticated_endpoints_configured, true);
-assert.match(health.source_commit, /^[0-9a-f]{40}$/);
+checkHealth(health, {
+  version: process.env.EXPECTED_VERSION, commit: process.env.EXPECTED_COMMIT,
+});
 for (const route of ["/v1/memories/add", "/v1/memories/search"]) {
   const denied = await get(route, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: "{}",
