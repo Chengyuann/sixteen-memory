@@ -9,6 +9,12 @@ const targets = [
   { origin: "https://96c2aae8.sixteen-memory-entry.pages.dev", version: "0.3.0",
     commit: "89eaca3952052c314b4c8e87f637ecc68c7fec0e" },
 ];
+// Optional diagnostic only: this hostname is NOT the registered AML entry.
+// Checking it from an independent network helps distinguish local DNS faults.
+if (process.env.INCLUDE_WORKERS_ORIGIN === "1") {
+  targets.push({ origin: "https://sixteen-memory-v030.mcy23.workers.dev", version: "0.3.0",
+    commit: "89eaca3952052c314b4c8e87f637ecc68c7fec0e" });
+}
 const report = { at: new Date().toISOString(), status: "running", targets: [],
   official_jobs: 0, authenticated_requests: 0, automatic_http_retries: 0,
   note: "Address fallback is operator-side only; passing does not certify AML connectivity." };

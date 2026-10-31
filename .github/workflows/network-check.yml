@@ -17,6 +17,7 @@ jobs:
       - name: Baseline and frozen candidate health and auth boundaries
         env:
           NETWORK_REPORT: ${{ runner.temp }}/network-report.json
+          INCLUDE_WORKERS_ORIGIN: "1"
         run: node cloudflare/scripts/network-check.mjs
       - name: Save sanitized diagnostic report
         if: always()
